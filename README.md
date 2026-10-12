@@ -5,7 +5,15 @@
 [![Python](https://img.shields.io/badge/Python-3.8+-blue?logo=python)](https://python.org)
 [![Data](https://img.shields.io/badge/Reviews-24%2C317-green)]()
 [![Platform](https://img.shields.io/badge/Platform-Google%20Play%20Store-brightgreen?logo=google-play)]()
+[![Dashboard](https://img.shields.io/badge/Live%20Dashboard-GitHub%20Pages-purple?logo=github)](https://vaibhav-0111.github.io/ratings-radar/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)]()
+
+---
+
+## 🌐 Live Interactive Dashboard
+
+👉 **[View Live Dashboard](https://vaibhav-0111.github.io/ratings-radar/)**
+*(Interactive charts, Star Drag rankings, weekly trends, version regression, and safety flags)*
 
 ---
 
