@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ratings Radar — MoveInSync Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0e1a;
+    --card: #111827;
+    --card2: #1a2235;
+    --border: #1f2d45;
+    --accent: #3b82f6;
+    --accent2: #8b5cf6;
+    --green: #10b981;
+    --red: #ef4444;
+    --orange: #f59e0b;
+    --text: #f1f5f9;
+    --muted: #64748b;
+    --glow: 0 0 30px rgba(59,130,246,0.15);
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(20px);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+
+  .logo h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+  .logo span { font-size: 12px; color: var(--muted); font-weight: 400; }
+
+  .header-badges { display: flex; gap: 10px; align-items: center; }
+
+  .badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .badge-blue { background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+  .badge-green { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+  .badge-red { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+
+  /* MAIN */
+  main { padding: 32px 40px; max-width: 1400px; margin: 0 auto; }
+
+  /* ALERT BANNER */
+  .alert-banner {
+    background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(239,68,68,0.05));
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 12px;
+    padding: 14px 20px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: pulse-red 3s ease-in-out infinite;
+  }
+  @keyframes pulse-red {
+    0%, 100% { border-color: rgba(239,68,68,0.3); }
+    50% { border-color: rgba(239,68,68,0.7); }
+  }
+  .alert-banner .icon { font-size: 20px; }
+  .alert-banner strong { color: #f87171; font-size: 14px; }
+  .alert-banner p { color: var(--muted); font-size: 13px; margin-top: 2px; }
+
+  /* KPI CARDS */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .kpi {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .kpi:hover { transform: translateY(-2px); box-shadow: var(--glow); }
+
+  .kpi::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .kpi.blue::before { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+  .kpi.green::before { background: linear-gradient(90deg, var(--green), #34d399); }
+  .kpi.red::before { background: linear-gradient(90deg, var(--red), #f97316); }
+  .kpi.orange::before { background: linear-gradient(90deg, var(--orange), #fbbf24); }
+  .kpi.purple::before { background: linear-gradient(90deg, var(--accent2), #ec4899); }
+
+  .kpi-label { font-size: 11px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
+  .kpi-value { font-size: 32px; font-weight: 800; letter-spacing: -1px; line-height: 1; }
+  .kpi-value.red { color: var(--red); }
+  .kpi-value.green { color: var(--green); }
+  .kpi-value.orange { color: var(--orange); }
+  .kpi-value.blue { color: var(--accent); }
+  .kpi-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+  /* GRID LAYOUTS */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+
+  /* CARD */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    transition: box-shadow 0.2s;
+  }
+  .card:hover { box-shadow: var(--glow); }
+
+  .card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-sub { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
+
+  .chart-wrap { position: relative; }
+
+  /* TOP FIXES TABLE */
+  .fix-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .fix-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--card2);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+    cursor: default;
+  }
+  .fix-item:hover { border-color: var(--accent); transform: translateX(4px); }
+
+  .fix-rank {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 800;
+    flex-shrink: 0;
+  }
+  .rank-1 { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #000; }
+  .rank-2 { background: linear-gradient(135deg, #94a3b8, #cbd5e1); color: #000; }
+  .rank-3 { background: linear-gradient(135deg, #b45309, #d97706); color: #fff; }
+  .rank-4 { background: rgba(255,255,255,0.1); color: var(--muted); }
+  .rank-5 { background: rgba(255,255,255,0.1); color: var(--muted); }
+
+  .fix-info { flex: 1; }
+  .fix-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .fix-owner { font-size: 11px; color: var(--muted); }
+
+  .fix-drag {
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .drag-val { font-size: 18px; font-weight: 800; color: var(--green); }
+  .drag-label { font-size: 10px; color: var(--muted); }
+
+  .sev-bar {
+    width: 60px;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+  .sev-fill { height: 100%; border-radius: 3px; }
+
+  /* VERSION TABLE */
+  .ver-table { width: 100%; border-collapse: collapse; }
+  .ver-table th {
+    text-align: left;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .ver-table td {
+    padding: 10px;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(31,45,69,0.5);
+  }
+  .ver-table tr:hover td { background: var(--card2); }
+  .ver-table .worst { color: var(--red); font-weight: 700; }
+  .ver-table .best { color: var(--green); font-weight: 700; }
+
+  .pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .pill-red { background: rgba(239,68,68,0.15); color: #f87171; }
+  .pill-green { background: rgba(16,185,129,0.15); color: #34d399; }
+  .pill-yellow { background: rgba(245,158,11,0.15); color: #fbbf24; }
+
+  /* SAFETY SECTION */
+  .safety-card {
+    background: linear-gradient(135deg, rgba(239,68,68,0.08), rgba(239,68,68,0.03));
+    border: 1px solid rgba(239,68,68,0.25);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .safety-title { font-size: 14px; font-weight: 700; color: #f87171; margin-bottom: 4px; }
+  .safety-sub { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+  .quote {
+    background: rgba(0,0,0,0.3);
+    border-left: 3px solid var(--red);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-style: italic;
+    color: #cbd5e1;
+    margin-bottom: 8px;
+  }
+
+  /* OWNER DONUT */
+  .owner-legend { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .legend-item { display: flex; align-items: center; gap: 10px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+  .legend-label { font-size: 12px; flex: 1; }
+  .legend-pct { font-size: 12px; font-weight: 700; }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 24px;
+    color: var(--muted);
+    font-size: 12px;
+    border-top: 1px solid var(--border);
+    margin-top: 20px;
+  }
+
+  /* LIVE DOT */
+  .live-dot {
+    width: 8px; height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    display: inline-block;
+    animation: blink 1.5s ease-in-out infinite;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">📡</div>
+    <div>
+      <h1>Ratings Radar</h1>
+      <span>MoveInSync · Google Play Store Analysis</span>
+    </div>
+  </div>
+  <div class="header-badges">
+    <span class="live-dot"></span>
+    <span style="font-size:12px;color:var(--muted);margin-right:8px">Last updated: Oct 12, 2026</span>
+    <span class="badge badge-blue">24,317 Reviews</span>
+    <span class="badge badge-green">90-Day Window</span>
+    <span class="badge badge-red">28.4% Low-Star</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- ALERT -->
+  <div class="alert-banner">
+    <div class="icon">⚠️</div>
+    <div>
+      <strong>Women's Safety — Severity 4 Flag</strong>
+      <p>2 reviews flagged female safety risk at night shifts. Requires immediate escalation — independent of Star Drag ranking.</p>
+    </div>
+  </div>
+
+  <!-- KPI ROW -->
+  <div class="kpi-grid">
+    <div class="kpi blue">
+      <div class="kpi-label">📊 Total Reviews</div>
+      <div class="kpi-value blue">24,317</div>
+      <div class="kpi-sub">Since 2019 · Play Store</div>
+    </div>
+    <div class="kpi orange">
+      <div class="kpi-label">⭐ Sample Avg (90d)</div>
+      <div class="kpi-value orange">3.81</div>
+      <div class="kpi-sub">Official rating: 4.64 ★</div>
+    </div>
+    <div class="kpi red">
+      <div class="kpi-label">📉 1–2 Star Share</div>
+      <div class="kpi-value red">28.4%</div>
+      <div class="kpi-sub">205 low-star reviews</div>
+    </div>
+    <div class="kpi red">
+      <div class="kpi-label">🔴 Worst Version</div>
+      <div class="kpi-value" style="font-size:22px;color:var(--red)">v12.19.0</div>
+      <div class="kpi-sub">34.3% low-star rate</div>
+    </div>
+    <div class="kpi purple">
+      <div class="kpi-label">💬 Owner Reply Rate</div>
+      <div class="kpi-value" style="font-size:30px;color:#a78bfa">0.6%</div>
+      <div class="kpi-sub">Critically low ← fix this free</div>
+    </div>
+  </div>
+
+  <!-- ROW 1: STAR DRAG + WEEKLY TREND -->
+  <div class="grid-2">
+
+    <!-- TOP 5 FIXES -->
+    <div class="card">
+      <div class="card-title">🎯 Top 5 Fixes — Ranked by Star Drag</div>
+      <div class="card-sub">If every 1–2★ review in this group became 4★, rating rises by this much</div>
+      <div class="fix-list">
+
+        <div class="fix-item">
+          <div class="fix-rank rank-1">1</div>
+          <div class="fix-info">
+            <div class="fix-name">App Crash / Freeze on Update</div>
+            <div class="fix-owner">Owner: App Engineering · Sev 2.97/4</div>
+            <div class="sev-bar"><div class="sev-fill" style="width:74%;background:linear-gradient(90deg,#f59e0b,#ef4444)"></div></div>
+          </div>
+          <div class="fix-drag">
+            <div class="drag-val">+0.094</div>
+            <div class="drag-label">star drag</div>
+          </div>
+        </div>
+
+        <div class="fix-item">
+          <div class="fix-rank rank-2">2</div>
+          <div class="fix-info">
+            <div class="fix-name">Late / No-Show Vehicle</div>
+            <div class="fix-owner">Owner: Ops / Vendor · Sev 2.89/4</div>
+            <div class="sev-bar"><div class="sev-fill" style="width:72%;background:linear-gradient(90deg,#f59e0b,#ef4444)"></div></div>
+          </div>
+          <div class="fix-drag">
+            <div class="drag-val">+0.064</div>
+            <div class="drag-label">star drag</div>
+          </div>
+        </div>
+
+        <div class="fix-item">
+          <div class="fix-rank rank-3">3</div>
+          <div class="fix-info">
+            <div class="fix-name">Login / OTP SMS Failure</div>
+            <div class="fix-owner">Owner: App Engineering · Sev 3.86/4 🔴</div>
+            <div class="sev-bar"><div class="sev-fill" style="width:96%;background:linear-gradient(90deg,#ef4444,#dc2626)"></div></div>
+          </div>
+          <div class="fix-drag">
+            <div class="drag-val">+0.053</div>
+            <div class="drag-label">star drag</div>
+          </div>
+        </div>
+
+        <div class="fix-item">
+          <div class="fix-rank rank-4">4</div>
+          <div class="fix-info">
+            <div class="fix-name">Confusing UI (Extra Taps)</div>
+            <div class="fix-owner">Owner: App Engineering · Sev 2.0/4</div>
+            <div class="sev-bar"><div class="sev-fill" style="width:50%;background:linear-gradient(90deg,#3b82f6,#6366f1)"></div></div>
+          </div>
+          <div class="fix-drag">
+            <div class="drag-val">+0.024</div>
+            <div class="drag-label">star drag</div>
+          </div>
+        </div>
+
+        <div class="fix-item">
+          <div class="fix-rank rank-5">5</div>
+          <div class="fix-info">
+            <div class="fix-name">Support Unresponsive</div>
+            <div class="fix-owner">Owner: Unclear · Sev 3.0/4</div>
+            <div class="sev-bar"><div class="sev-fill" style="width:75%;background:linear-gradient(90deg,#8b5cf6,#a78bfa)"></div></div>
+          </div>
+          <div class="fix-drag">
+            <div class="drag-val">+0.017</div>
+            <div class="drag-label">star drag</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- WEEKLY TREND CHART -->
+    <div class="card">
+      <div class="card-title">📅 Weekly Rating Trend</div>
+      <div class="card-sub">Last 12 weeks — avg star rating & 1-star spike %</div>
+      <div class="chart-wrap" style="height:300px">
+        <canvas id="weeklyChart"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ROW 2: ROOT CAUSE BAR + OWNER DONUT + VERSION TABLE -->
+  <div class="grid-3">
+
+    <!-- ROOT CAUSE BAR CHART -->
+    <div class="card">
+      <div class="card-title">🔍 Star Drag by Root Cause</div>
+      <div class="card-sub">Top 6 (excluding 'other')</div>
+      <div class="chart-wrap" style="height:260px">
+        <canvas id="dragChart"></canvas>
+      </div>
+    </div>
+
+    <!-- OWNER PIE -->
+    <div class="card">
+      <div class="card-title">👥 Who Owns the 1–2★ Pain?</div>
+      <div class="card-sub">By team ownership of low-star reviews</div>
+      <div style="max-width:200px;margin:0 auto">
+        <canvas id="ownerChart"></canvas>
+      </div>
+      <div class="owner-legend">
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#64748b"></div>
+          <div class="legend-label">Unclear (generic reviews)</div>
+          <div class="legend-pct" style="color:#94a3b8">62.4%</div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#3b82f6"></div>
+          <div class="legend-label">App Engineering</div>
+          <div class="legend-pct" style="color:#60a5fa">26.8%</div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#f59e0b"></div>
+          <div class="legend-label">Ops / Vendor</div>
+          <div class="legend-pct" style="color:#fbbf24">9.8%</div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#10b981"></div>
+          <div class="legend-label">Customer Config</div>
+          <div class="legend-pct" style="color:#34d399">1.0%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VERSION TABLE -->
+    <div class="card">
+      <div class="card-title">📱 Version Regression Analysis</div>
+      <div class="card-sub">Versions with ≥30 reviews, worst first</div>
+      <table class="ver-table">
+        <thead>
+          <tr>
+            <th>Version</th>
+            <th>Reviews</th>
+            <th>Avg ★</th>
+            <th>% Low</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="pill pill-red">12.19.0 ← LATEST</span></td>
+            <td>105</td>
+            <td class="worst">3.62</td>
+            <td class="worst">34.3%</td>
+          </tr>
+          <tr>
+            <td>12.16.1</td>
+            <td>38</td>
+            <td class="worst">3.53</td>
+            <td class="worst">34.2%</td>
+          </tr>
+          <tr>
+            <td>12.17.0</td>
+            <td>141</td>
+            <td style="color:var(--orange)">3.76</td>
+            <td style="color:var(--orange)">29.8%</td>
+          </tr>
+          <tr>
+            <td>12.16.0</td>
+            <td>89</td>
+            <td>3.87</td>
+            <td>27.0%</td>
+          </tr>
+          <tr>
+            <td>12.18.1</td>
+            <td>94</td>
+            <td>3.90</td>
+            <td>26.6%</td>
+          </tr>
+          <tr>
+            <td>12.15.0</td>
+            <td>80</td>
+            <td class="best">4.05</td>
+            <td class="best">22.5%</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-green">12.18.0 ← BEST</span></td>
+            <td>65</td>
+            <td class="best">4.11</td>
+            <td class="best">20.0%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- SAFETY SECTION -->
+  <div class="safety-card">
+    <div class="safety-title">⚠️ Women's Safety Reviews — Severity 4 · Immediate Escalation Required</div>
+    <div class="safety-sub">These 2 reviews are flagged independently of Star Drag ranking. Severity 4 = employee unable to travel safely.</div>
+    <div class="quote">"worst app . zero support. unsafe for female" — 1★ · Aug 7, 2026</div>
+    <div class="quote">"No concern for female employees at logout time, they won't even send a cab" — 1★ · Jul 31, 2026</div>
+  </div>
+
+</main>
+
+<footer>
+  📡 Ratings Radar · Built for MoveInSync FDE Case Study · Data: Google Play Store (google-play-scraper) · 24,317 reviews scraped Oct 12, 2026
+  &nbsp;·&nbsp; <a href="https://github.com/Vaibhav-0111/ratings-radar" style="color:var(--accent);text-decoration:none">github.com/Vaibhav-0111/ratings-radar</a>
+</footer>
+
+<script>
+// Weekly trend chart
+const wCtx = document.getElementById('weeklyChart').getContext('2d');
+new Chart(wCtx, {
+  type: 'line',
+  data: {
+    labels: ['Jul 20','Jul 27','Aug 3','Aug 10','Aug 17','Aug 24','Aug 31','Sep 7','Sep 14','Sep 21','Sep 28','Oct 5'],
+    datasets: [{
+      label: 'Avg Rating',
+      data: [4.24, 3.98, 3.33, 3.45, 3.95, 4.02, 3.82, 4.02, 3.90, 3.56, 3.64, 3.86],
+      borderColor: '#3b82f6',
+      backgroundColor: 'rgba(59,130,246,0.08)',
+      borderWidth: 2.5,
+      pointRadius: 4,
+      pointBackgroundColor: '#3b82f6',
+      fill: true,
+      tension: 0.4,
+      yAxisID: 'y'
+    },{
+      label: '1-Star %',
+      data: [12.24, 18.97, 33.33, 30.36, 25.42, 23.53, 25.49, 20.00, 23.19, 31.58, 29.55, 26.98],
+      borderColor: '#ef4444',
+      backgroundColor: 'rgba(239,68,68,0.05)',
+      borderWidth: 2,
+      pointRadius: 3,
+      pointBackgroundColor: '#ef4444',
+      fill: true,
+      tension: 0.4,
+      borderDash: [4,2],
+      yAxisID: 'y2'
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { labels: { color: '#94a3b8', font: { size: 11, family: 'Inter' } } }
+    },
+    scales: {
+      x: { ticks: { color: '#64748b', font: { size: 10 } }, grid: { color: '#1f2d45' } },
+      y: {
+        position: 'left', min: 2.5, max: 5,
+        ticks: { color: '#3b82f6', font: { size: 10 } },
+        grid: { color: '#1f2d45' },
+        title: { display: true, text: 'Avg Rating', color: '#3b82f6', font: { size: 11 } }
+      },
+      y2: {
+        position: 'right', min: 0, max: 50,
+        ticks: { color: '#ef4444', font: { size: 10 }, callback: v => v + '%' },
+        grid: { drawOnChartArea: false },
+        title: { display: true, text: '1★ Share %', color: '#ef4444', font: { size: 11 } }
+      }
+    }
+  }
+});
+
+// Star Drag bar chart
+const dCtx = document.getElementById('dragChart').getContext('2d');
+new Chart(dCtx, {
+  type: 'bar',
+  data: {
+    labels: ['App Crash','Late Vehicle','OTP Failure','Confusing UI','Slow App','Support'],
+    datasets: [{
+      label: 'Star Drag',
+      data: [0.094, 0.064, 0.053, 0.024, 0.019, 0.017],
+      backgroundColor: [
+        'rgba(245,158,11,0.8)', 'rgba(59,130,246,0.8)', 'rgba(239,68,68,0.8)',
+        'rgba(139,92,246,0.8)', 'rgba(16,185,129,0.8)', 'rgba(236,72,153,0.8)'
+      ],
+      borderRadius: 8,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ` +${ctx.raw} star drag` } }
+    },
+    scales: {
+      x: { ticks: { color: '#64748b', font: { size: 10 } }, grid: { color: '#1f2d45' } },
+      y: { ticks: { color: '#cbd5e1', font: { size: 11, family: 'Inter' } }, grid: { display: false } }
+    }
+  }
+});
+
+// Owner donut chart
+const oCtx = document.getElementById('ownerChart').getContext('2d');
+new Chart(oCtx, {
+  type: 'doughnut',
+  data: {
+    labels: ['Unclear','App Engineering','Ops/Vendor','Customer Config'],
+    datasets: [{
+      data: [62.4, 26.8, 9.8, 1.0],
+      backgroundColor: ['#374151','#3b82f6','#f59e0b','#10b981'],
+      borderColor: '#111827',
+      borderWidth: 3,
+      hoverOffset: 6
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.raw}% of low-star reviews` } }
+    },
+    cutout: '68%'
+  }
+});
+</script>
+</body>
+</html>
