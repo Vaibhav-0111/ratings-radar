@@ -1,0 +1,14 @@
+root_cause,low_reviews,share_of_low_%,star_drag,avg_severity
+other,115,55.6,0.463,2.0
+app_crash_or_freeze,24,11.6,0.094,2.97
+late_or_no_show_vehicle,16,7.7,0.064,2.89
+login_or_otp_sms_failure,13,6.3,0.053,3.86
+none,11,5.3,0.042,1.0
+confusing_ui,6,2.9,0.024,2.0
+slow_app,5,2.4,0.019,2.0
+support_unresponsive,4,1.9,0.017,3.0
+wrong_or_stale_eta_or_map,4,1.9,0.015,3.0
+booking_failed_or_unavailable,3,1.4,0.011,4.0
+driver_behaviour,2,1.0,0.008,3.0
+roster_or_shift_mismatch,2,1.0,0.007,3.0
+safety_concern,2,1.0,0.007,4.0
